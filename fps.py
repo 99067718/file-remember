@@ -3,20 +3,68 @@ import random
 import threading
 import time
 import tkinter
-import pygame
 import os.path
 import json
+import pickle
+from operator import itemgetter
 from tkinter import messagebox
 
+def saveHighScore():
+    global highscoreList
+    nameWindow = tkinter.Tk()
+    playerNameVar = tkinter.StringVar()
+    textLabel = tkinter.Label(text="Enter your name").pack()
+    enterName = tkinter.Entry(textvariable=playerNameVar).pack()
+    continueButton = tkinter.Button(text="continue",command=nameWindow.destroy).pack()
+    nameWindow.mainloop()
+    playerName = playerNameVar.get()
+    highscoreList.append((playerName, currentScore))
+    highscoreList = sorted(highscoreList, key = itemgetter(1), reverse = True)[:10]
+    if len(highscoreList) > 10:
+        highscoreList.pop(-1)
+
+    with open('data/highscore.json', 'w') as f:
+        json.dump(highscoreList, f)
+
+    ##### show all highscores #####
+    showScoresWindow = tkinter.Tk()
+    showScoresWindow.title("Leaderboard")
+    showScoresWindow.config(bg="black")
+    for i in range(len(highscoreList)):
+        tkinter.Label(showScoresWindow,text=f"{i + 1}. {highscoreList[i][0]}   ",font=("Comic Sans MS", 20, "bold"),fg="white",bg="black", anchor="w").grid(sticky = 'W', column=0,row=i)
+        tkinter.Label(showScoresWindow,text=f"score:{highscoreList[i][1]}   ",font=("Comic Sans MS", 20, "bold"),bg="black",fg="green", anchor="w").grid(sticky = 'W', column=1,row=i)
+    showScoresWindow.mainloop()
+    ###############################
+    # for i in range(9):
+    #     var1 = i + 1
+    #     var2 = i
+    #     print(var1)
+    #     try:
+    #         if int(highscoreDict[var1]) < int(highscoreDict[var2]):
+    #             highscoreDict[var1] = highscoreDict[var2]
+    #     except Exception as e:
+    #         print("poop", e)
+    #     print(highscoreDict)
+    #     if highscoreDict["highscore1"] < highscore:
+    #         highscoreDict["highscore1"] = highscore
+    #     with open("data/highscore.json","w") as file:
+    #         data = json.dumps(highscoreDict)
+    #         json.dump(data, file)
+    # file.close()
+    
+
 if os.path.exists("data/highscore.json"):
-    with open("data/highscore.json","r") as file:
-        highscoreDict = json.load(file)
+    with open('data/highscore.json', 'r') as f:
+        highscoreList = json.load(f)
 else:
     with open("data/highscore.json","w") as file:
-        file.write('{"highscore1" : 0,"highscore2" : 0,"highscore3" : 0,"highscore4": 0,"highscore5" : 0,"highscore6" : 0,"highscore7" : 0,"highscore8" : 0,"highscore9" : 0,"highscore10" : 0}')
-        highscoreDict = {"highscore1" : 0,"highscore2" : 0,"highscore3" : 0,"highscore4": 0,"highscore5" : 0,"highscore6" : 0,"highscore7" : 0,"highscore8" : 0,"highscore9" : 0,"highscore10" : 0}
-
-highscore = highscoreDict["highscore1"]
+        highscoreList = []
+        data = json.dumps(highscoreList)
+        json.dump(data, file)
+try:
+    highscore = int(highscoreList[0][1])
+except:
+    highscore = 0
 
 currentScore = 0
 listOfMoves = ["Press A", "Press S", "Press D", "Press W", "Triple Click", "Double Click","Click Once", "Press SpaceBar"]
@@ -62,21 +110,7 @@ def addScore(event):
 
 def exitGame():
     window.destroy()
-    
-    for i in range(9):
-        var1 = 11 - i
-        var2 = 10 - i
-        print(var1)
-        try:
-            if highscoreDict[var1] < highscoreDict[var2]:
-                highscoreDict[var1] = highscoreDict[var2]
-        except:
-            print("poop")
-    print(highscoreDict)
-    highscoreDict["highscore1"] = highscore
-    with open("data/highscore.json","w") as file:
-        file.write(str(highscoreDict))
-    messagebox.showinfo(message=str(highscoreDict))
+    saveHighScore()
     exit()
 
 def timerOfGame():
@@ -85,11 +119,11 @@ def timerOfGame():
     global RestartButton
     global exitButton
     timeLeftText = " seconds left"
-    timeLeft = 60
+    timeLeft = 60                       ############################### Time ###############################
     timeVar = tkinter.StringVar(value= str(timeLeft) + timeLeftText)
     timerLabel = tkinter.Label(textvariable=timeVar, bg="black",fg="white",font=("Comic Sans MS", 14))
     timerLabel.place(y=10,x=330)
-    for i in range(60):
+    for i in range(timeLeft):
         time.sleep(1)
         timeLeft -= 1
         timeVar.set(str(timeLeft) + timeLeftText)
@@ -150,5 +184,11 @@ currentScoreFrame.place(y=10,x=150)
 threading.Timer(1.0, movePicker).start()
 threading.Timer(1.0, timerOfGame).start()
 window.mainloop()
+
+saveHighScore()
+
+
+
+
 
 
