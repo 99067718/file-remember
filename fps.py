@@ -31,7 +31,11 @@ def saveHighScore():
     showScoresWindow.title("Leaderboard")
     showScoresWindow.config(bg="black")
     for i in range(len(highscoreList)):
-        tkinter.Label(showScoresWindow,text=f"{i + 1}. {highscoreList[i][0]}   ",font=("Comic Sans MS", 20, "bold"),fg="white",bg="black", anchor="w").grid(sticky = 'W', column=0,row=i)
+        if len(highscoreList[i][0]) == 3:
+            nameColor = "#ffc629"
+        else:
+            nameColor = "white"
+        tkinter.Label(showScoresWindow,text=f"{i + 1}. {highscoreList[i][0]}   ",font=("Comic Sans MS", 20, "bold"),fg=nameColor,bg="black", anchor="w").grid(sticky = 'W', column=0,row=i)
         tkinter.Label(showScoresWindow,text=f"score:{highscoreList[i][1]}   ",font=("Comic Sans MS", 20, "bold"),bg="black",fg="green", anchor="w").grid(sticky = 'W', column=1,row=i)
     showScoresWindow.mainloop()
     ###############################
